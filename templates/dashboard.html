@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>CampusFix | Dashboard</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+          rel="stylesheet">
+
+    <style>
+
+        body {
+            background: #f4f6f9;
+            font-family: Arial, sans-serif;
+        }
+
+        .navbar {
+            background: #142b4a;
+        }
+
+        .navbar-brand {
+            color: white;
+            font-weight: bold;
+            font-size: 24px;
+        }
+
+        .dashboard-container {
+            padding: 35px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 22px;
+            border-radius: 10px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+            margin-bottom: 20px;
+        }
+
+        .stat-number {
+            font-size: 30px;
+            font-weight: bold;
+            color: #142b4a;
+        }
+
+        .stat-title {
+            color: #777;
+        }
+
+        .content-card {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+        }
+
+        .btn-campus {
+            background: #142b4a;
+            color: white;
+        }
+
+        .btn-campus:hover {
+            background: #254b78;
+            color: white;
+        }
+
+    </style>
+
+</head>
+
+<body>
+
+<!-- Navigation -->
+
+<nav class="navbar navbar-expand-lg">
+
+    <div class="container-fluid px-4">
+
+        <a class="navbar-brand" href="#">
+            CampusFix
+        </a>
+
+        <div class="text-white">
+
+            Welcome, {{ request.user.username }}
+
+        </div>
+
+    </div>
+
+</nav>
+
+
+<!-- Dashboard -->
+
+<div class="container-fluid dashboard-container">
+
+    <div class="d-flex justify-content-between align-items-center mb-4">
+
+        <div>
+
+            <h2>Incident Dashboard</h2>
+
+            <p class="text-muted">
+                Monitor and manage campus IT incidents.
+            </p>
+
+        </div>
+
+        <a href="{% url 'report_incident' %}"
+           class="btn btn-campus">
+
+            + Report Incident
+
+        </a>
+
+    </div>
+
+
+    <!-- Statistics -->
+
+    <div class="row">
+
+        <div class="col-md-4 col-lg-2">
+
+            <div class="stat-card">
+
+                <p class="stat-title">Total Incidents</p>
+
+                <div class="stat-number">
+                    {{ total_incidents }}
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="col-md-4 col-lg-2">
+
+            <div class="stat-card">
+
+                <p class="stat-title">New</p>
+
+                <div class="stat-number">
+                    {{ new_incidents }}
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="col-md-4 col-lg-2">
+
+            <div class="stat-card">
+
+                <p class="stat-title">Assigned</p>
+
+                <div class="stat-number">
+                    {{ assigned_incidents }}
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="col-md-4 col-lg-2">
+
+            <div class="stat-card">
+
+                <p class="stat-title">In Progress</p>
+
+                <div class="stat-number">
+                    {{ in_progress_incidents }}
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="col-md-4 col-lg-2">
+
+            <div class="stat-card">
+
+                <p class="stat-title">Resolved</p>
+
+                <div class="stat-number">
+                    {{ resolved_incidents }}
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <div class="col-md-4 col-lg-2">
+
+            <div class="stat-card">
+
+                <p class="stat-title">Closed</p>
+
+                <div class="stat-number">
+                    {{ closed_incidents }}
+                </div>
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <!-- Incident Table -->
+
+    <div class="content-card mt-4">
+
+        <h4 class="mb-4">Recent Incidents</h4>
+
+        <div class="table-responsive">
+
+            <table class="table table-hover align-middle">
+
+                <thead class="table-light">
+
+                    <tr>
+
+                        <th>Incident</th>
+
+                        <th>Category</th>
+
+                        <th>Priority</th>
+
+                        <th>Status</th>
+
+                        <th>Reported By</th>
+
+                        <th>Assigned Technician</th>
+
+                        <th>Date Reported</th>
+
+                    </tr>
+
+                </thead>
+
+
+                <tbody>
+
+                    {% for incident in incidents %}
+
+                    <tr>
+
+                        <td>
+                            {{ incident.title }}
+                        </td>
+
+                        <td>
+                            {{ incident.get_category_display }}
+                        </td>
+
+                        <td>
+
+                            <span class="badge bg-warning text-dark">
+
+                                {{ incident.get_priority_display }}
+
+                            </span>
+
+                        </td>
+
+                        <td>
+
+                            {% if incident.status == 'NEW' %}
+
+                                <span class="badge bg-danger">
+                                    New
+                                </span>
+
+                            {% elif incident.status == 'ASSIGNED' %}
+
+                                <span class="badge bg-info text-dark">
+                                    Assigned
+                                </span>
+
+                            {% elif incident.status == 'IN_PROGRESS' %}
+
+                                <span class="badge bg-primary">
+                                    In Progress
+                                </span>
+
+                            {% elif incident.status == 'RESOLVED' %}
+
+                                <span class="badge bg-success">
+                                    Resolved
+                                </span>
+
+                            {% elif incident.status == 'CLOSED' %}
+
+                                <span class="badge bg-secondary">
+                                    Closed
+                                </span>
+
+                            {% endif %}
+
+                        </td>
+
+                        <td>
+                            {{ incident.reporter.username }}
+                        </td>
+
+                        <td>
+
+                            {% if incident.assigned_technician %}
+
+                                {{ incident.assigned_technician.username }}
+
+                            {% else %}
+
+                                <span class="text-muted">
+                                    Not assigned
+                                </span>
+
+                            {% endif %}
+
+                        </td>
+
+                        <td>
+                            {{ incident.created_at|date:"d M Y, H:i" }}
+                        </td>
+
+                    </tr>
+
+                    {% empty %}
+
+                    <tr>
+
+                        <td colspan="7"
+                            class="text-center text-muted py-4">
+
+                            No incidents have been reported yet.
+
+                        </td>
+
+                    </tr>
+
+                    {% endfor %}
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </div>
+
+</div>
+
+</body>
+
+</html>
